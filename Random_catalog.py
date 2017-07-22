@@ -117,81 +117,6 @@ def cmb_to_helio(z, ra, dec):
 
     return one_plus_z_helio - 1.
 
-
-"""
-def random_catalog(Nsample, selection_func, rfi_func, dist_slection, rfi_helio):
-    :param Nsample:
-    :param selection_func:
-    :param rfi_func:
-    :param dist_slection:
-    :param rfi_helio:
-    :return:
-
-#    ra_rand = np.zeros(20*Nsample, dtype=np.float64)
-#    dec_rand = np.zeros(20*Nsample, dtype=np.float64)
-#    dist_rand = np.zeros(20*Nsample, dtype=np.float64)
-#    selection_rand = np.zeros(20*Nsample, dtype=np.float64)
-
-    ra_rand = []
-    dec_rand = []
-    dist_rand = []
-    selection_rand = []
-
-    ncount = 0
-
-
-    for i in xrange(0, 50):
-        u = random.uniform(0, 1.0001)
-        if min(selection_func) <= u <= max(selection_func):
-            j = 0
-            while u <= psi_slection[j]:
-                j += 1
-
-            zi_cmb = min(dist_slection)*cosmo.H0.value/c_km_s
-            #Vol1 = cosmo.comoving_volume(dist_slection[j-1]*cosmo.H0.value/c_km_s).value - cosmo.comoving_volume(zi_cmb).value
-            Vol1 = coVol(dist_slection[j-1]*cosmo.H0.value/c_km_s) - coVol(zi_cmb)
-            ngal = int(Vol1*Ngal)
-            print ngal
-
-
-            while ncount < ngal:
-                tht = np.arccos(2 * random.uniform(0, 1) - 1)
-                phi = random.uniform(0, 2 * np.pi)
-                r = random.uniform(0, 1.0001)
-                if min(dist_slection) <= r*dist_slection[j-1] <= dist_slection[j-1]:
-                    if 135 < np.degrees(phi) < 230:
-                        if 3.5 < 90-np.degrees(tht) < 16.5:
-                            V_cmb = Ho*r*dist_slection[j-1]
-                            Z_cmb = V_cmb/c_km_s
-                            Z_helio = cmb_to_helio(Z_cmb, m.degrees(phi), 90.-m.degrees(tht))
-                            V_helio = Z_helio*c_km_s
-                            k = 0
-                            while V_helio < rfi_helio[k]:
-                                k += 1
-
-                            if rfi_func[k-1] >= 0.8:
-
-                                dist_rand.append(r * dist_slection[j - 1])
-                                ra_rand.append(np.degrees(phi))
-                                dec_rand.append((90 - np.degrees(tht)))
-                                selection_rand.append(psi_slection[j])
-                                ncount += 1
-
-
-
-    ra_rand = np.asarray(ra_rand)
-    dec_rand = np.asarray(dec_rand)
-    dist_rand = np.asarray(dist_rand)
-    selection_rand = np.asarray(selection_rand)
-
-    xyz = radec_to_xyz(ra_rand, dec_rand)
-    xyz[0, :] = np.multiply(xyz[0, :], dist_rand)
-    xyz[1, :] = np.multiply(xyz[1, :], dist_rand)
-    xyz[2, :] = np.multiply(xyz[2, :], dist_rand)
-
-    return ra_rand, dec_rand, xyz, dist_rand
-
-    """
 #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 data1 = ascii.read('/home/sandeep/Nishi/data/a40.datafile1.csv', delimiter=',', guess=False)
@@ -205,7 +130,6 @@ HICode = data1['HIcode']
 HIflux = data1['HIflux']
 RMS = data1['RMS']
 SNR = data1['SNR']
-
 
 ra_HI = np.asarray(ra_HI)  # HI ra
 dec_HI = np.asarray(dec_HI)  # HI dec
@@ -335,6 +259,13 @@ fint_RFI = scipy.interpolate.interp1d(RFI_helio, RFI_selec, kind='cubic')
 index1 = (M_HI_50 <= 10.0) * (M_HI_50 >= 9.5)
 mass = M_HI_50[index1]
 
+data_ra = ra_HI_50[index1]
+data_dec = dec_HI_50[index1]
+data_z = z_cmb_50[index1]
+
+np.savetxt('/dataspace/sandeep/Nishi_plots/Nishi_dataCat.txt', zip(data_ra, data_dec, data_z),
+           fmt='%0.6e\t%0.6e\t%0.6e', delimiter='\t')
+
 
 #theta = (np.random.uniform(0, 1, size=5*len(mass)))*15.0+72.0
 #rand_dec = np.subtract(90, theta)
@@ -352,11 +283,10 @@ count3 = 0
 rand_dist = []
 rand_ra = []
 rand_dec = []
-rand_dist = []
 print Dist_psi
 
 np.random.seed(7337777)
-while ncount < 20*len(mass):
+while ncount < 5*len(mass):
     key = 'None'
     while key == 'None':
         temp_dist = np.random.uniform(min(Dist_psi), max(Dist_psi))
@@ -385,6 +315,15 @@ while ncount < 20*len(mass):
         ncount += 1
 
 rand_dist = np.asarray(rand_dist)
+rand_ra = np.asarray(rand_ra)
+rand_dec = np.asarray(rand_dec)
+
+V_cmb = Ho * rand_dist
+Z_cmb = V_cmb / c_km_s
+
+np.savetxt('/dataspace/sandeep/Nishi_plots/Nishi_randomCat.txt', zip(rand_ra, rand_dec, Z_cmb),
+           fmt='%0.6e\t%0.6e\t%0.6e', delimiter='\t')
+
 data = radec_to_xyz(rand_ra, rand_dec)
 data[0, :] = np.multiply(data[0, :], rand_dist)
 data[1, :] = np.multiply(data[1, :], rand_dist)
@@ -413,7 +352,7 @@ hist1, xedges = np.histogram(rand_dist, bins=bin1)
 plt.figure(3, figsize=(10, 4))
 h2 = hist(Dist_cmb_50, bins=50, histtype='stepfilled', ec='k', fc='#AAAAAA', label='data')
 #h3 = hist(rand_dist, bins=bin1, histtype='step', ec='g', fc='#AAAAAA', label='random')
-plt.plot(xedges[:-1], hist1, 'g-', linewidth=1)
+plt.plot(xedges[:-1], hist1, 'r-', linewidth=1,label='random' )
 plt.minorticks_on()
 plt.tick_params(axis='both', which='minor', length=5, width=2, labelsize=14)
 plt.tick_params(axis='both', which='major', length=8, width=2, labelsize=14)
@@ -421,24 +360,47 @@ plt.ylabel(r'$N$', fontsize='large', fontstyle='italic', weight='extra bold')
 plt.xlabel(r'$D_{cmb}$', fontsize='xx-large', fontstyle='italic', weight='extra bold')
 plt.legend()
 plt.xlim(10, 220)
-plt.figure(4, figsize=(8, 6))
-plt.plot(ra_HI_50, dec_HI_50, 'go', ms =3)
-plt.plot(rand_ra, rand_dec, 'ro', ms=3)
+
+plt.savefig('/home/sandeep/Nishi_plots/redshift_dist.eps', dpi=100)
+plt.figure(4, figsize=(9, 9))
+plt.plot(ra_HI_50, dec_HI_50, 'g.', ms =2)
+plt.plot(rand_ra, rand_dec, 'r.', ms=2)
 plt.minorticks_on()
 plt.tick_params(axis='both', which='minor', length=5, width=2, labelsize=14)
 plt.tick_params(axis='both', which='major', length=8, width=2, labelsize=14)
 plt.xlabel(r'$Ra_{HI}$', fontsize='large', fontstyle='italic', weight='extra bold')
 plt.ylabel(r'$Dec_{HI}$', fontsize='large', fontstyle='italic', weight='extra bold')
+plt.savefig('/home/sandeep/Nishi_plots/rand_data.eps', dpi=100)
 
 
 plt.figure(6)
 plt.plot(data[0, :], data[1, :], 'bo', ms=2)
+plt.tick_params(axis='both', which='minor', length=5, width=2, labelsize=14)
+plt.tick_params(axis='both', which='major', length=8, width=2, labelsize=14)
+plt.xlabel(r'$x$', fontsize='large', fontstyle='italic', weight='extra bold')
+plt.ylabel(r'$y$', fontsize='large', fontstyle='italic', weight='extra bold')
+
+plt.savefig('/home/sandeep/Nishi_plots/xy.eps', dpi=100)
+
 plt.figure(7)
 plt.plot(data[0, :], data[2, :], 'go', ms=2)
+plt.xlabel(r'$x$', fontsize='large', fontstyle='italic', weight='extra bold')
+plt.ylabel(r'$z$', fontsize='large', fontstyle='italic', weight='extra bold')
+
+plt.savefig('/home/sandeep/Nishi_plots/xz.eps', dpi=100)
+
+
 plt.figure(8)
 plt.plot(data[1, :], data[2, :], 'ro', ms=2)
+plt.xlabel(r'$y$', fontsize='large', fontstyle='italic', weight='extra bold')
+plt.ylabel(r'$z$', fontsize='large', fontstyle='italic', weight='extra bold')
 
+plt.savefig('/home/sandeep/Nishi_plots/yz.eps', dpi=100)
 plt.figure(9)
 plt.plot(rand_dist, rand_selection, 'ro', ms=2)
+plt.xlabel(r'$Dist_{random}$', fontsize='large', fontstyle='italic', weight='extra bold')
+plt.ylabel(r'$f(x)$', fontsize='large', fontstyle='italic', weight='extra bold')
 
+plt.savefig('/home/sandeep/Nishi_plots/rand_selection.eps', dpi=100)
 plt.show()
+
