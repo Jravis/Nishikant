@@ -12,9 +12,6 @@ Delta_f_r = np.genfromtxt(name, usecols=2)
 Delta_f_i = np.genfromtxt(name, usecols=3)
 mu_sqr= np.genfromtxt(name, usecols=5)
 
-plt.plot(Delta_m_r, Delta_f_r, 'b.')
-plt.plot(Delta_m_r, -0.12*(1. + 1.47*mu_sqr)*Delta_m_r, 'r*', ms=6)
-
 """
 Delta_m = []
 Delta_f = []
@@ -39,12 +36,9 @@ pars.add('bias', value=-2.0, min=-5.0, max=2.0, brute_step=0.03517588)
 pars.add('lnPn', value = 5, min=-10,max= 10,  brute_step= 0.10050251)
 """
 
-
-"""
 pars.add('beta', value=2.0, min=0.05, max=10)
 pars.add('bias', value=-2.0, min=-5.0, max=2.0)
 pars.add('lnPn', value = 5, min=-10,max= 10)
-
 
 
 def residual(p1):    
@@ -61,8 +55,6 @@ def residual(p1):
     tmp1 = Delta_f_i-(Delta_m_i*tmp1)
 
     return  (tmp*tmp)/np.exp(lnPn) + np.log(2.*np.pi)*lnPn + (tmp1*tmp1)/np.exp(lnPn) + np.log(2.*np.pi)*lnPn 
-
-
 
 
 def lnprob(p1):
@@ -132,7 +124,7 @@ plt.plot(res.flatchain['bias'], 'r-', alpha=0.3)
 plt.figure(4, figsize=(8, 6))
 plt.plot(res.flatchain['beta'], 'b-', alpha=0.3)
 #plt.savefig('/dataspace/sandeep/Nishi_plots/for_sandeep_saili/beta_chain.pdf', dpi=300)
-"""
+
 
 
 
