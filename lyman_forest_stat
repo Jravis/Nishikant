@@ -1,0 +1,18 @@
+------------------------------------------
+median of posterior probability distribution
+------------------------------------------
+[[Variables]]
+    beta:   1.46793146 +/- 0.053075 (3.62%) (init= 2)
+    bias:  -0.11824217 +/- 0.001802 (1.52%) (init=-2)
+    lnPn:  -2.14335855 +/- 0.030861 (1.44%) (init= 5)
+[[Correlations]] (unreported correlations are <  0.100)
+    C(beta, bias)                =  0.890 
+
+Maximum likelihood Estimation
+-----------------------------
+Parameters([('beta', <Parameter 'beta', 1.4667564696545925, bounds=[0.05:10]>), ('bias', <Parameter 'bias', -0.1182710653584458, bounds=[-5.0:2.0]>), ('lnPn', <Parameter 'lnPn', -2.1444820716316735, bounds=[-10:10]>)])
+
+Finally lets work out 2-sigma error estimate
+('2 sigma spread in a', 0.10660582599910573)
+('2 sigma spread in b', 0.0035922766882491297)
+('2 sigma spread in c', 0.061482686788750351)
